@@ -4,11 +4,8 @@ var router = express.Router()
 
 
 //Root
-router.route('/carro')
+router.route('/')
     .get(function(req, res) {
-        if(!global.db) res.send("Erro interno")
-        
-        console.log(req.params)
         res.send("hello")
     })
     .post(function(req, res) {
@@ -19,7 +16,7 @@ router.route('/carro')
 })
 
 //Marcas ativas
-router.route('/carro/marcasativas')
+router.route('/marcasativas')
     .get(function(req, res) {
         res.send("hey")
     })
@@ -31,7 +28,7 @@ router.route('/carro/marcasativas')
 })
 
 //Modelos ativos
-router.route('/carro/modelosativos')
+router.route('/modelosativos')
     .get(function(req, res) {
         res.send(req.body)
     })
@@ -43,7 +40,7 @@ router.route('/carro/modelosativos')
 })
 
 //Versoes ativas
-router.route('/carro/versoesativas')
+router.route('/versoesativas')
     .get(function(req, res) {
         res.send(req.body)
     })

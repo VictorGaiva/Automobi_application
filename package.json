@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/VictorGaiva/Automobi_application/issues"
   },
-  "homepage": "https://github.com/VictorGaiva/Automobi_application#readme"
+  "homepage": "https://github.com/VictorGaiva/Automobi_application#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
 }

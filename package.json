@@ -18,6 +18,9 @@
   "homepage": "https://github.com/VictorGaiva/Automobi_application#readme",
   "dependencies": {
     "express": "^4.16.3",
-    "mongodb": "^3.1.6"
+    "joi": "^13.6.0",
+    "mongodb": "^3.1.6",
+    "nodemon": "^1.18.4",
+    "request": "^2.88.0"
   }
 }

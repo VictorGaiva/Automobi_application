@@ -19,18 +19,22 @@ const new_data = [
 
 MongoClient.connect('mongodb://localhost:27017/test', {useNewUrlParser: true}, function (err, client) {
     if (err) throw err
-    
-    //Connect to the database
-    var db = client.db('test')
-    
-    new_data.forEach(coll => {
-        db.createCollection(coll.name, function(err, res) {
-            if (err) throw err;
-            console.log("Collection created!");
-        });
-        db.collection(coll.name).insertMany(coll.data, function(err, res) {
-            if (err) throw err;
-            console.log("Data inserted");
+    //Clear old database
+    let db = client.db('test')
+    db.dropDatabase('test', function(err, res) {
+        if (err) throw err;
+        //Create each collection
+        new_data.forEach(coll => {
+            db.createCollection(coll.name, function(err, res) {
+                if (err) throw err;
+                console.log("Collection created!");
+                
+                //And insert the data
+                db.collection(coll.name).insertMany(coll.data, function(err, res) {
+                    if (err) throw err;
+                    console.log("Data inserted");
+                });
+            });
         });
     });
 })

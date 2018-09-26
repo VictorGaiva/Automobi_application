@@ -1,7 +1,17 @@
 const MongoClient = require('mongodb').MongoClient
 const express = require('express')
-var router = express.Router()
+let router = express.Router()
 
+let dataBase = (collection, func) => {
+    MongoClient.connect('mongodb://localhost:27017/test',{useNewUrlParser: true} , function (err, connection) {
+        if (err) throw err
+        func(connection.db('test'), connection)
+    })
+}
+
+let validateJson = (schema, data) => {
+
+}
 
 //Root
 router.route('/')
@@ -18,7 +28,13 @@ router.route('/')
 //Marcas ativas
 router.route('/marcasativas')
     .get(function(req, res) {
-        res.send("hey")
+        dataBase('marcasativas', function (db, connection) {
+            db.collection('marcasativas').find({}).toArray(function(err, result) {
+                if (err) throw err
+                res.send(result)
+                connection.close()
+            })
+        })
     })
     .post(function(req, res) {
         res.send("hey")
@@ -26,6 +42,7 @@ router.route('/marcasativas')
     .put(function(req, res) {
         res.send("hey")
 })
+
 
 //Modelos ativos
 router.route('/modelosativos')

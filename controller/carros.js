@@ -102,19 +102,36 @@ router.route('/:collection')
                     connection.close()
                 }
 
-                //Create the ID variable
-                const id = MongoID(req.query.id)
+                //Validate the ID field
+                let id = validateID(req.query.id)
+                if (!id){
+                    res.status(400).send('ID field is invalid.')
+                    console.log(`Update with invalid ID "${req.query.id}"`)
+                    connection.close()
+                    return
+                }
 
                 //Check if data already exists on database
-
-            
-                //Add it to data base
-                db.collection(req.params.collection).updateOne({_id:id}, {$set:req.body}, function(err, result) {
+                db.collection(req.params.collection).findOne({_id:id}, function(err, result) {
                     if (err) throw err
-                    res.send("Data updated")
-                    console.log(`Updated data to DB. ID=${result}`)
+                    else if(result){
+                        //If it does, update it
+                        db.collection(req.params.collection).updateOne({_id:id}, {$set:req.body}, function(err, result) {
+                            if (err) throw err
+                            res.send(result)
+                            console.log(`Updated data to DB. ID=${result}`)
+                            connection.close()
+                        });
+                    }
+                    else{
+                        //If it doesn't, inform the user
+                        res.status(404).send("Item not found.")
+                        console.log(err, result)
+                    }
                     connection.close()
-                });
+                })
+            
+                
             }
             else{
                 //Get the error message
@@ -134,11 +151,11 @@ router.route('/:collection')
 //View
 router.route('/:collection/:id').get(function(req, res) {
     dataBase(req.params.collection, function (db, connection) {
-        //Check if the ID is set
+        //Validate the ID field
         let id = validateID(req.params.id)
 
         if (!id){
-            res.status(400).send('ID field is not valid.')
+            res.status(400).send('ID field is invalid.')
             console.log(`Querry with invalid ID "${req.params.id}"`)
             connection.close()
             return
@@ -157,7 +174,6 @@ router.route('/:collection/:id').get(function(req, res) {
                 res.status(404).send("Item not found.")
                 console.log(err, result)
             }
-            
             connection.close()
         })
     })

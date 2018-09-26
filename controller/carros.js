@@ -10,7 +10,7 @@ let dataBase = (collection, func) => {
 }
 
 let validateJson = (schema, data) => {
-
+    
 }
 
 //Root
@@ -23,15 +23,16 @@ router.route('/')
     })
     .put(function(req, res) {
         res.send("hello")
-})
+}) 
 
 //Marcas ativas
-router.route('/marcasativas')
+router.route('/:collection')
     .get(function(req, res) {
-        dataBase('marcasativas', function (db, connection) {
-            db.collection('marcasativas').find({}).toArray(function(err, result) {
+        dataBase(req.params.collection, function (db, connection) {
+            db.collection(req.params.collection).find({}).toArray(function(err, result) {
                 if (err) throw err
                 res.send(result)
+                console.log(req.params.collection)
                 connection.close()
             })
         })
@@ -43,29 +44,5 @@ router.route('/marcasativas')
         res.send("hey")
 })
 
-
-//Modelos ativos
-router.route('/modelosativos')
-    .get(function(req, res) {
-        res.send(req.body)
-    })
-    .post(function(req, res) {
-        res.send(req.body)
-    })
-    .put(function(req, res) {
-        res.send(req.body)
-})
-
-//Versoes ativas
-router.route('/versoesativas')
-    .get(function(req, res) {
-        res.send(req.body)
-    })
-    .post(function(req, res) {
-        res.send(req.body)
-    })
-    .put(function(req, res) {
-        res.send(req.body)
-})
 
 module.exports = router

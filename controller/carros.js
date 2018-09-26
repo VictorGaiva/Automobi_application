@@ -1,4 +1,5 @@
 const MongoClient   = require('mongodb').MongoClient
+const MongoID       = require('mongodb').ObjectId
 const express       = require('express')
 const Joi           = require('joi')
 
@@ -9,6 +10,7 @@ let router = express.Router()
 // E = 
 // V = Done
 // L = Done
+// D =
 
 let schema = {
     "marcasativas":{
@@ -34,12 +36,23 @@ let dataBase = (collection, func) => {
     })
 }
 
+const validateID = (idString) =>{
+    let id
+    //Create the ID variable
+    try {
+        id = MongoID(idString)
+    } catch (error) {
+        return null
+    }
+    return id
+}
+
 //Root
 router.route('/').all(function(req, res) {
     res.status(400).send("<div>Bad request</div>")
 })
 
-//Marcas ativas
+//
 router.route('/:collection')
     //List
     .get(function(req, res) {
@@ -77,7 +90,41 @@ router.route('/:collection')
         })
     })
     .put(function(req, res) {
-        res.send("hey")
+        dataBase(req.params.collection, function (db, connection) {
+            //Check if data is valid
+            const valid = Joi.validate(req.body, schema[req.params.collection])
+            
+
+            if(!valid.error){
+                //Check if the ID is set
+                if(!req.query.id){
+                    res.status(400).send("Updating data must be done by quering it using its ID.")
+                    connection.close()
+                }
+
+                //Create the ID variable
+                const id = MongoID(req.query.id)
+
+                //Check if data already exists on database
+
+            
+                //Add it to data base
+                db.collection(req.params.collection).updateOne({_id:id}, {$set:req.body}, function(err, result) {
+                    if (err) throw err
+                    res.send("Data updated")
+                    console.log(`Updated data to DB. ID=${result}`)
+                    connection.close()
+                });
+            }
+            else{
+                //Get the error message
+                const message = valid.error.details[0].message
+                //inform the client about the error
+                res.status(400).send(`${message}`)
+                console.log(`Unable to update ${req.body}. Error: ${message}`)
+                connection.close()
+            }
+        })
     })
     .delete(function(req, res) {
         res.send("hey")
@@ -87,10 +134,30 @@ router.route('/:collection')
 //View
 router.route('/:collection/:id').get(function(req, res) {
     dataBase(req.params.collection, function (db, connection) {
-        db.collection(req.params.collection).findOne(req.query, function(err, result) {
+        //Check if the ID is set
+        let id = validateID(req.params.id)
+
+        if (!id){
+            res.status(400).send('ID field is not valid.')
+            console.log(`Querry with invalid ID "${req.params.id}"`)
+            connection.close()
+            return
+        }
+        
+        //Check if data already exists on database
+        db.collection(req.params.collection).findOne({_id:id}, function(err, result) {
             if (err) throw err
-            res.send(result)
-            console.log(req.query)
+            else if(result){
+                //If it does, send the object to the user
+                res.send(result)
+                console.log(result)
+            }
+            else{
+                //If it doesn't, inform the user
+                res.status(404).send("Item not found.")
+                console.log(err, result)
+            }
+            
             connection.close()
         })
     })

@@ -5,25 +5,25 @@ const Joi           = require('joi')
 let router = express.Router()
 
 
-// C = 
+// C = Done
 // E = 
 // V = Done
 // L = Done
 
-const schema = {
+let schema = {
     "marcasativas":{
-        N: Joi.string().min(1).required(),
-        C: Joi.number().min(1).required()
+        'N': Joi.string().min(1).required(),
+        'C': Joi.number().min(1).required()
     },
     "versoesativas":{
-        Id: Joi.number().min(0).required(),
-        Nome: Joi.string().min(5).required(),
-        Count: Joi.number().min(0).required(),
-        NomeAmigavel: Joi.string().min(5).required()
+        'Id': Joi.number().min(0).required(),
+        'Nome': Joi.string().min(5).required(),
+        'Count': Joi.number().min(0).required(),
+        'NomeAmigavel': Joi.string().min(5).required()
     },
     "modelosativos":{
-        N: Joi.string().min(1).required(),
-        C: Joi.number().min(1).required()
+        'N': Joi.string().min(1).required(),
+        'C': Joi.number().min(1).required()
     }
 }
 
@@ -32,18 +32,6 @@ let dataBase = (collection, func) => {
         if (err) throw err
         func(connection.db('test'), connection)
     })
-}
-
-let validateData = (data, collection) => {
-    const result = Joi.validate(data, schema[collection])
-    
-    if (result){
-        res.status(400).send(result.error)
-        console.log(result)
-        connection.close()
-        return false
-    }
-    return true
 }
 
 //Root
@@ -64,14 +52,27 @@ router.route('/:collection')
             })
         })
     })
+
     //Create
     .post(function(req, res) {
         dataBase(req.params.collection, function (db, connection) {
             //Check if data is ok
-            const isValid = validateData(req.body, req.params.collection)
-            
-            if(isValid){
 
+            const valid = Joi.validate(req.body, schema[req.params.collection])
+ 
+            if(!valid.error){
+                db.collection(req.params.collection).insertOne(req.body, function(err, result) {
+                    if (err) throw err
+                    res.send("Data added to Database")
+                    console.log(`Added data to DB. ID=${result.insertedId}`)
+                    connection.close()
+                })
+            }
+            else{
+                const message = valid.error.details[0].message
+                res.status(400).send(`${message}`)
+                console.log(`Unable to add ${req.body}. Error: ${message}`)
+                return false
             }
         })
     })

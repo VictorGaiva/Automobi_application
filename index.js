@@ -12,14 +12,8 @@ app.use('/carro/', require('./controller/carros'))
 
 //Default route. Used only for testing
 app.route('/')
-    .get(function(req, res) {
-        res.send("Nothing to see here")
-    })
-    .post(function(req, res) {
-        res.send("Nothing to add here")
-    })
-    .put(function(req, res) {
-        res.send("Nothing to change here")
+.all(function(req, res) {
+    res.status(400).send("<div>Bad request</div>")
 })
 
 app.listen(port, () => console.log(`Listening on port ${port}.`))

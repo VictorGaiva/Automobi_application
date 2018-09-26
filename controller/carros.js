@@ -144,7 +144,58 @@ router.route('/:collection')
         })
     })
     .delete(function(req, res) {
-        res.send("hey")
+        dataBase(req.params.collection, function (db, connection) {
+            //Check if data is valid
+            const valid = Joi.validate(req.body, schema[req.params.collection])
+            
+
+            if(!valid.error){
+                //Check if the ID is set
+                if(!req.query.id){
+                    res.status(400).send("Deleting data must be done by quering it using its ID.")
+                    connection.close()
+                }
+
+                //Validate the ID field
+                let id = validateID(req.query.id)
+                if (!id){
+                    res.status(400).send('ID field is invalid.')
+                    console.log(`Delete with invalid ID "${req.query.id}"`)
+                    connection.close()
+                    return
+                }
+
+                //Check if data exists on database
+                db.collection(req.params.collection).findOne({_id:id}, function(err, result) {
+                    if (err) throw err
+                    else if(result){
+                        //If it does, delete it
+                        db.collection(req.params.collection).deleteOne({_id:id}, function(err, result) {
+                            if (err) throw err
+                            res.send(result)
+                            console.log(`Item removed. ID=${result}`)
+                            connection.close()
+                        });
+                    }
+                    else{
+                        //If it doesn't, inform the user
+                        res.status(404).send("Item not found.")
+                        console.log(err, result)
+                    }
+                    connection.close()
+                })
+            
+                
+            }
+            else{
+                //Get the error message
+                const message = valid.error.details[0].message
+                //inform the client about the error
+                res.status(400).send(`${message}`)
+                console.log(`Unable to delete ${req.body}. Error: ${message}`)
+                connection.close()
+            }
+        })
 })
 
 

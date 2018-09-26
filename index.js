@@ -1,19 +1,9 @@
-const MongoClient = require('mongodb').MongoClient
 const express = require('express')
 const app = express()
-
+const queryParser = require('express-query-int');
 const port = 3000
 
-/*
-MongoClient.connect('mongodb://localhost:27017/test', function (err, client) {
-if (err) throw err
-const db = client.db('animals')
-db.collection('mammals').find().toArray(function (err, result) {
-    if (err) throw err
-    //
-    console.log(result)
-})*/
-    
+app.use(queryParser());
 app.use('/carro/', require('./controller/carros'))
 
 //Default route. Used only for testing

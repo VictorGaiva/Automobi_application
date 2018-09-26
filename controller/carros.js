@@ -2,6 +2,7 @@ const MongoClient = require('mongodb').MongoClient
 const express = require('express')
 let router = express.Router()
 
+
 let dataBase = (collection, func) => {
     MongoClient.connect('mongodb://localhost:27017/test',{useNewUrlParser: true} , function (err, connection) {
         if (err) throw err
@@ -10,7 +11,7 @@ let dataBase = (collection, func) => {
 }
 
 let validateJson = (schema, data) => {
-    
+
 }
 
 //Root
@@ -23,16 +24,16 @@ router.route('/')
     })
     .put(function(req, res) {
         res.send("hello")
-}) 
+})
 
 //Marcas ativas
 router.route('/:collection')
     .get(function(req, res) {
         dataBase(req.params.collection, function (db, connection) {
-            db.collection(req.params.collection).find({}).toArray(function(err, result) {
+            db.collection(req.params.collection).find(req.query).toArray(function(err, result) {
                 if (err) throw err
                 res.send(result)
-                console.log(req.params.collection)
+                console.log(req.query)
                 connection.close()
             })
         })
@@ -43,6 +44,14 @@ router.route('/:collection')
     .put(function(req, res) {
         res.send("hey")
 })
-
-
+router.route('/:collection/:id').get(function(req, res) {
+    dataBase(req.params.collection, function (db, connection) {
+        db.collection(req.params.collection).findOne(req.query, function(err, result) {
+            if (err) throw err
+            res.send(result)
+            console.log(req.query)
+            connection.close()
+        })
+    })
+})
 module.exports = router
